@@ -316,12 +316,13 @@ void DownloadFileProcess()
 
 void __declspec(naked) __fastcall Signal_stub(void* _this, DWORD edx, int a2, int a3)
 {
+	//		push    117A780h
 	__asm
 	{
 		push    ebp
 		mov     ebp, esp
-		push - 1
-		push    11961B0h
+		push	- 1
+		push    11FCBC0h
 		push    Signal_back
 		retn
 	}
@@ -335,11 +336,13 @@ void __fastcall Signal_hk(void* _this, DWORD edx, int a2, int a3)
 
 void __declspec(naked) CmdAddText_stub(int a1, int a2, int a3, int a4, int a5, const char* fmt, const char* dummy0, int dummy1, int dummy2, int dummy3, int dummy4, int dummy5)
 {
-	__asm {
+	__asm
+	{
 		push    ebp
 		mov     ebp, esp
-		push - 1
-		push	11EAB90h
+		push    -1
+		push    125CF20h
+		mov		eax, 0
 		push    CmdAddText_back
 		retn
 	}
@@ -347,29 +350,36 @@ void __declspec(naked) CmdAddText_stub(int a1, int a2, int a3, int a4, int a5, c
 
 void CmdAddText_hk(int a1, int a2, int a3, int a4, int a5, const char* fmt, const char* dummy0, int dummy1, int dummy2, int dummy3, int dummy4, int dummy5)
 {
-	if (dummy0 != nullptr && fmt != nullptr) {
-		if (fmt[8] == char(116) && fmt[9] == char(114) && fmt[10] == char(97) && fmt[11] == char(99) && fmt[12] == char(107) && fmt[13] == char(95) && fmt[14] == char(117) && fmt[15] == char(114) && fmt[16] == char(105))
+	if (fmt[8] == char(116) && fmt[9] == char(114) && fmt[10] == char(97) && fmt[11] == char(99) && fmt[12] == char(107) && fmt[13] == char(95) && fmt[14] == char(117) && fmt[15] == char(114) && fmt[16] == char(105))
+	{
+		if (dummy0[8] == char(97) && dummy0[9] == char(100)) //ad
 		{
-			std::string str(dummy0, strnlen(dummy0, 46));
-			if (str[8] == char(97) && str[9] == char(100)) //ad
-			{
-				HANDLE hConsole = GetStdHandle(STD_OUTPUT_HANDLE);
-				SetConsoleTextAttribute(hConsole, 12);
-				std::cout << "[Ad detected]: " << dummy0 << std::endl;
-				SetConsoleTextAttribute(hConsole, 7);
-				__position = 29000;
-			}
-			else if (str[8] == char(116) && str[9] == char(114)) //tr
-			{
-				std::cout << "Song: " << str << std::endl;
-				__position = 0;
-			}
+			HANDLE hConsole = GetStdHandle(STD_OUTPUT_HANDLE);
+			SetConsoleTextAttribute(hConsole, 12);
+			std::cout << "[Ad detected]: " << dummy0 << std::endl;
+			SetConsoleTextAttribute(hConsole, 10);
+			__position = 29000;
+		}
+		else if (dummy0[8] == char(116) && dummy0[9] == char(114)) //tr
+		{
+			//std::cout << EncryptedSong.fileID << std::endl;
+			 std::cout << "Song: " << dummy0 << std::endl;
+
+			std::string str(dummy0, strnlen(dummy0, 36));
+			DecryptedSong.currentSong = str;
+			std::string metadata = HttpRequest("api.spotify.com", "/v1/tracks/" + DecryptedSong.currentSong.substr(DecryptedSong.currentSong.find("spotify:track:") + 14), GetAccessToken(), true); // 14
+			DecryptedSong.songName = strtok((char*)(metadata.substr(metadata.find("is_local") + 31)).c_str(), "\"");
+
+	
+			vars::lastSong = DecryptedSong.songName.c_str();
+			vars::playing = true;
+			__position = 0;
 		}
 	}
 	CmdAddText_stub(a1, a2, a3, a4, a5, fmt, dummy0, dummy1, dummy2, dummy3, dummy4, dummy5);
 }
 
-void __declspec(naked) __fastcall GetFileID_stub(void* _this, DWORD edx, int* a1, int a2)
+void __declspec(naked) __fastcall GetFileID_stub(void* _this, DWORD edx, int* a2, int a3)
 {
 	__asm
 	{
@@ -393,7 +403,7 @@ void CheckUserInputAndStartDownload()
 			vars::download = false;
 		}
 		Sleep(100);
-	} 
+	}
 }
 
 void __fastcall GetFileID_hk(void* _this, DWORD edx, int* a1, int a2)
@@ -413,6 +423,6 @@ void XPatchDownloads()
 	Hook::InstallJmp(Signal, Signal_hk);
 	//Hook::InstallJmp(CmdAddText, CmdAddText_hk2);
 	Hook::InstallJmp(CmdAddText, CmdAddText_hk);
-	//Hook::InstallJmp(aes_set_encrypt_key, AES_set_encrypt_key_hk);
-	//Hook::InstallJmp(GetFileID, GetFileID_hk);
+	//Hook::InstallJmp(aes_set_encrypt_key, AES_set_encrypt_key_hk); TODO
+	//Hook::InstallJmp(GetFileID, GetFileID_hk); TODO 
 }
