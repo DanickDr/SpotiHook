@@ -34,8 +34,21 @@ void Init() {
     zgui::functions.get_frametime = get_frametime;
     printf("[+] GUI render proxy initialized!\n");
     //CreateThread(0, 0, (LPTHREAD_START_ROUTINE)MsgLoop, 0, 0, 0);
+    /*MEMORY_BASIC_INFORMATION mbi;
+
+    VirtualQuery(code_base_here, &mbi, sizeof(mbi));
+
+    for (ULONG baseOfCode = code_base_here; baseOfCode < end_of_code_here; baseOfCode += mbi.RegionSize) {
+        VirtualProtect(mbi.BaseAddress, mbi.RegionSize, PAGE_EXECUTE_READWRITE, &mbi.Protect);
+
+        // Do stuff
+
+        VirtualProtect(mbi.BaseAddress, mbi.RegionSize, mbi.Protect, &mbi.Protect); // Set it back to normal
+        VirtualQuery(baseOfCode, &mbi, sizeof(mbi));
+    } */
+
     XPatchDownloads();
-    XPatchAutoUpdates();
+    //XPatchAutoUpdates();
     XPatchAds();
     while (true)
         render_scene();

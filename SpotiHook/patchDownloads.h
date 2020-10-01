@@ -322,7 +322,7 @@ void __declspec(naked) __fastcall Signal_stub(void* _this, DWORD edx, int a2, in
 		push    ebp
 		mov     ebp, esp
 		push	- 1
-		push    11FCBC0h
+		push    11F25E0h //11FCBC0h
 		push    Signal_back
 		retn
 	}
@@ -331,6 +331,7 @@ void __declspec(naked) __fastcall Signal_stub(void* _this, DWORD edx, int a2, in
 void __fastcall Signal_hk(void* _this, DWORD edx, int a2, int a3)
 {
 	check = true;
+	std::cout << "signal called" << std::endl;
 	Signal_stub(_this, edx, a2, a3);
 }
 
@@ -341,7 +342,7 @@ void __declspec(naked) CmdAddText_stub(int a1, int a2, int a3, int a4, int a5, c
 		push    ebp
 		mov     ebp, esp
 		push    -1
-		push    125CF20h
+		push    16525F0h//12525F0h
 		mov		eax, 0
 		push    CmdAddText_back
 		retn
@@ -350,29 +351,30 @@ void __declspec(naked) CmdAddText_stub(int a1, int a2, int a3, int a4, int a5, c
 
 void CmdAddText_hk(int a1, int a2, int a3, int a4, int a5, const char* fmt, const char* dummy0, int dummy1, int dummy2, int dummy3, int dummy4, int dummy5)
 {
+	std::cout << "cmdaddtext called: " << fmt << std::endl;
 	if (fmt[8] == char(116) && fmt[9] == char(114) && fmt[10] == char(97) && fmt[11] == char(99) && fmt[12] == char(107) && fmt[13] == char(95) && fmt[14] == char(117) && fmt[15] == char(114) && fmt[16] == char(105))
 	{
 		if (dummy0[8] == char(97) && dummy0[9] == char(100)) //ad
 		{
 			HANDLE hConsole = GetStdHandle(STD_OUTPUT_HANDLE);
 			SetConsoleTextAttribute(hConsole, 12);
-			std::cout << "[Ad detected]: " << dummy0 << std::endl;
+			std::cout << "SKIPPING AD: " << dummy0 << std::endl;
 			SetConsoleTextAttribute(hConsole, 10);
 			__position = 29000;
 		}
 		else if (dummy0[8] == char(116) && dummy0[9] == char(114)) //tr
 		{
 			//std::cout << EncryptedSong.fileID << std::endl;
-			 std::cout << "Song: " << dummy0 << std::endl;
+			 std::cout << "playing: " << dummy0 << std::endl;
 
-			std::string str(dummy0, strnlen(dummy0, 36));
+			/*std::string str(dummy0, strnlen(dummy0, 36));
 			DecryptedSong.currentSong = str;
 			std::string metadata = HttpRequest("api.spotify.com", "/v1/tracks/" + DecryptedSong.currentSong.substr(DecryptedSong.currentSong.find("spotify:track:") + 14), GetAccessToken(), true); // 14
 			DecryptedSong.songName = strtok((char*)(metadata.substr(metadata.find("is_local") + 31)).c_str(), "\"");
 
 	
 			vars::lastSong = DecryptedSong.songName.c_str();
-			vars::playing = true;
+			vars::playing = true; */
 			__position = 0;
 		}
 	}
